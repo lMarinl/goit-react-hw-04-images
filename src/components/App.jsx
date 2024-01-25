@@ -28,11 +28,13 @@ export const App = () => {
         setStatus(STATUS.pending);
 
         const { hits, totalHits } = await searchPicture(search, page);
+        console.log('hits: ', hits);
+
         if (page === 1 && totalHits) {
           toast(`Hooray! We found ${totalHits} images!`);
         }
 
-        if (Array.isArray(pictures) && pictures.length === 0) {
+        if (Array.isArray(hits) && hits.length === 0) {
           toast.info('You still do not have any picture!');
         }
         setPictures(prevState => [...prevState, ...hits]);
