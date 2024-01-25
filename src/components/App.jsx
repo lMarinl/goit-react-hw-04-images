@@ -57,7 +57,7 @@ export const App = () => {
     setPage(1);
     setPictures([]);
     setTotalHits(0);
-    event.currentTarget.reset();
+    // event.currentTarget.reset();
   };
 
   const handleShowModalWindow = largeImageUrl => {
@@ -72,13 +72,11 @@ export const App = () => {
   const handleLoadMore = () => {
     setPage(prevState => prevState + 1);
   };
-
   const ShowButton = status === STATUS.success && pictures.length !== totalHits;
 
   return (
     <>
       <Searchbar onSubmit={handelSubmit} />
-
       {pictures.length > 0 && (
         <ImageGallery
           pictures={pictures}
