@@ -1,5 +1,4 @@
-import { Component } from 'react';
-
+import { useEffect, useState } from 'react';
 import { Button } from './Button/Button';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Loader } from './Loader/Loader';
@@ -8,101 +7,95 @@ import { Searchbar } from './Searchbar/Searchbar';
 
 import { searchPicture } from 'services/API';
 import { STATUS } from 'utils/utils';
+import { toast } from 'react-toastify';
 
-export class App extends Component {
-  state = {
-    pictures: [],
-    status: STATUS.idle,
-    error: null,
-    search: '',
-    page: 1,
-    totalHits: null,
-    modalData: null,
-    isOpenModal: false,
-    showLoadMore: false,
-  };
+export const App = () => {
+  const [pictures, setPictures] = useState([]);
+  const [status, setStatus] = useState(STATUS.idle);
+  const [error, setError] = useState(null);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalHits, setTotalHits] = useState(0);
+  const [modalData, setModalData] = useState(null);
+  const [isOpenModal, setIsOpenModal] = useState(false);
 
-  fetchPictureByQuery = async (search, page) => {
+  useEffect(() => {
+    if (!search) {
+      return;
+    }
+
+    fetchPictureByQuery(search, page);
+  }, [search, page]);
+
+  const fetchPictureByQuery = async (search, page) => {
     try {
-      this.setState({ status: STATUS.pending });
+      setStatus(STATUS.pending);
 
       const { hits, totalHits } = await searchPicture(search, page);
-
-      this.setState(prevState => ({
-        pictures: [...prevState.pictures, ...hits],
-        status: STATUS.success,
-        totalHits,
-        showLoadMore: this.state.page < Math.ceil(totalHits / 12),
-      }));
+      if (page === 1 && totalHits) {
+        toast(`Hooray! We found ${totalHits} images!`);
+      }
+      setPictures(prevState => [...prevState, ...hits]);
+      setStatus(STATUS.success);
+      setTotalHits(totalHits);
     } catch (error) {
-      this.setState({ error: error.message, status: STATUS.error });
+      setError(error.message);
+      setStatus(STATUS.error);
     }
   };
 
-  componentDidUpdate(prevProps, prevState) {
-    if (
-      this.state.search !== prevState.search ||
-      this.state.page !== prevState.page
-    ) {
-      this.fetchPictureByQuery(this.state.search, this.state.page);
-    }
-  }
-
-  handelSubmit = event => {
+  const handelSubmit = event => {
     event.preventDefault();
     const searchValue = event.currentTarget.search.value.trim().toLowerCase();
-    this.setState({ search: searchValue, page: 1, pictures: [] });
 
-    // event.currentTarget.reset();
+    setSearch(searchValue);
+    setPage(1);
+    setPictures([]);
+    setTotalHits(0);
+    event.currentTarget.reset();
   };
 
-  handleShowModalWindow = largeImageUrl => {
-    this.setState({ modalData: largeImageUrl, isOpenModal: true });
-    console.log(this.modalData);
-    console.log(largeImageUrl);
+  const handleShowModalWindow = largeImageUrl => {
+    setModalData(largeImageUrl);
+    setIsOpenModal(true);
   };
 
-  handleCloseModalWindow = () => {
-    this.setState({ isOpenModal: false });
+  const handleCloseModalWindow = () => {
+    setIsOpenModal(false);
   };
 
-  handleLoadMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+  const handleLoadMore = () => {
+    setPage(prevState => prevState + 1);
   };
 
-  render() {
-    const { pictures, status, totalHits, isOpenModal, modalData } = this.state;
+  const showPicturesEmpty =
+    status === STATUS.success &&
+    Array.isArray(pictures) &&
+    pictures.length === 0;
 
-    const showPicturesEmpty =
-      status === STATUS.success &&
-      Array.isArray(pictures) &&
-      pictures.length === 0;
+  const ShowButton = status === STATUS.success && pictures.length !== totalHits;
+  return (
+    <>
+      <Searchbar onSubmit={handelSubmit} />
 
-    const ShowButton =
-      status === STATUS.success && pictures.length !== totalHits;
+      {status === STATUS.error && <p>Oops</p>}
+      {showPicturesEmpty && <p>You still don't have any picture!</p>}
 
-    return (
-      <>
-        <Searchbar onSubmit={this.handelSubmit} />
-        {status === STATUS.pending && <Loader />}
-        {status === STATUS.error && <p>Oops</p>}
-        {showPicturesEmpty && <p>You still don't have any picture!</p>}
+      {pictures.length > 0 && (
+        <ImageGallery
+          pictures={pictures}
+          handleShowModalWindow={handleShowModalWindow}
+        />
+      )}
+      {status === STATUS.pending && <Loader />}
 
-        {pictures.length > 0 && (
-          <ImageGallery
-            pictures={pictures}
-            // modalData={modalData}
-            handleShowModalWindow={this.handleShowModalWindow}
-          />
-        )}
-        {ShowButton && <Button handleLoadMore={this.handleLoadMore} />}
-        {isOpenModal && (
-          <Modal
-            modalData={modalData}
-            handleCloseModalWindow={this.handleCloseModalWindow}
-          />
-        )}
-      </>
-    );
-  }
-}
+      {ShowButton && <Button handleLoadMore={handleLoadMore} />}
+      {isOpenModal && (
+        <Modal
+          modalData={modalData}
+          handleCloseModalWindow={handleCloseModalWindow}
+        />
+      )}
+    </>
+  );
+};

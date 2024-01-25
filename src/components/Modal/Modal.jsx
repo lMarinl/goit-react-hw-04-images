@@ -1,37 +1,43 @@
-import { Component } from 'react';
+import { Component, useEffect } from 'react';
 import css from './Modal.module.css';
 
-export class Modal extends Component {
-  handleOverlayClick = event => {
-    if (event.target === event.currentTarget) {
-      this.props.handleCloseModalWindow();
-    }
-  };
+export const Modal = ({ modalData, handleCloseModalWindow }) => {
+  // const componentDidMount() {
+  //   document.body.style.overflow = 'hidden';
+  //   window.addEventListener('keydown', this.handelKeyPress);
+  // }
 
-  handelKeyPress = event => {
-    if (event.code === 'Escape') {
-      this.props.handleCloseModalWindow();
-    }
-  };
-
-  componentDidMount() {
+  // componentWillUnmount() {
+  //   document.body.style.overflow = 'auto';
+  //   window.removeEventListener('keydown', this.handelKeyPress);
+  // }
+  useEffect(() => {
     document.body.style.overflow = 'hidden';
-    window.addEventListener('keydown', this.handelKeyPress);
-  }
+    window.addEventListener('keydown', handelKeyPress);
 
-  componentWillUnmount() {
-    document.body.style.overflow = 'auto';
-    window.removeEventListener('keydown', this.handelKeyPress);
-  }
+    return () => {
+      document.body.style.overflow = 'auto';
+      window.removeEventListener('keydown', handelKeyPress);
+    };
+  });
 
-  render() {
-    const { modalData } = this.props;
-    return (
-      <div className={css.Overlay} onClick={this.handleOverlayClick}>
-        <div className={css.Modal}>
-          <img src={modalData} alt="img" />
-        </div>
+  const handleOverlayClick = event => {
+    if (event.target === event.currentTarget) {
+      handleCloseModalWindow();
+    }
+  };
+
+  const handelKeyPress = event => {
+    if (event.code === 'Escape') {
+      handleCloseModalWindow();
+    }
+  };
+
+  return (
+    <div className={css.Overlay} onClick={handleOverlayClick}>
+      <div className={css.Modal}>
+        <img src={modalData} alt="img" />
       </div>
-    );
-  }
-}
+    </div>
+  );
+};

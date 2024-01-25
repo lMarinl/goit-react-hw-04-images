@@ -2,7 +2,6 @@ import css from './ImageGalleryItem.module.css';
 
 export const ImageGalleryItem = ({
   pictures,
-  // modalData,
   handleShowModalWindow,
 }) => {
   return (
