@@ -14,6 +14,5 @@ export const searchPicture = async (search, page) => {
     },
   });
   const { data } = await instance.get();
-  console.log(data);
   return data;
 };

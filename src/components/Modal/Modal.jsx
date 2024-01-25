@@ -1,16 +1,7 @@
-import { Component, useEffect } from 'react';
+import { useEffect } from 'react';
 import css from './Modal.module.css';
 
 export const Modal = ({ modalData, handleCloseModalWindow }) => {
-  // const componentDidMount() {
-  //   document.body.style.overflow = 'hidden';
-  //   window.addEventListener('keydown', this.handelKeyPress);
-  // }
-
-  // componentWillUnmount() {
-  //   document.body.style.overflow = 'auto';
-  //   window.removeEventListener('keydown', this.handelKeyPress);
-  // }
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     window.addEventListener('keydown', handelKeyPress);
