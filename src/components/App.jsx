@@ -28,7 +28,6 @@ export const App = () => {
         setStatus(STATUS.pending);
 
         const { hits, totalHits } = await searchPicture(search, page);
-        console.log('hits: ', hits);
 
         if (page === 1 && totalHits) {
           toast(`Hooray! We found ${totalHits} images!`);
